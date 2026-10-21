@@ -7,7 +7,7 @@ import { WEAP, isDeadType } from './content.js';
 import { attack, shoot, hurt, adjFoe, nearestHostile, nearestAlly, perceives, seesE, stepField, wander, keepFormation, ok, partOf, stage, corpseName, dropTorch, noise, The, the } from './rules.js';
 
 // how far your dead will leave the ring: tune here
-export const ENGAGE = { near: 5, attacker: 8, leash: 6 };
+export const ENGAGE = { near: 9, attacker: 11, leash: 11 };
 
 export function act(e) {
   if (e.unbound) return actUnbound(e);
@@ -24,7 +24,7 @@ function actMinion(e) {
   // defensive: only those who have struck at you or your dead; aggressive: also anyone who comes close to you
   let tgt = null;
   if (mt && dist(e, mt) <= 10) tgt = mt;
-  else { tgt = nearestHostile(e, 8, o => (o.atkT >= S.turn - 2 && dist(o, pl) <= ENGAGE.attacker) || (S.stance === 'aggressive' && dist(o, pl) <= ENGAGE.near && (perceives(e, o) || seesE(o)))); if (tgt && Math.max(Math.abs(e.x - pl.x), Math.abs(e.y - pl.y)) > ENGAGE.leash) tgt = null; }
+  else { tgt = nearestHostile(e, 12, o => (o.atkT >= S.turn - 2 && dist(o, pl) <= ENGAGE.attacker) || (S.stance === 'aggressive' && dist(o, pl) <= ENGAGE.near && (perceives(e, o) || seesE(o)))); if (tgt && Math.max(Math.abs(e.x - pl.x), Math.abs(e.y - pl.y)) > ENGAGE.leash) tgt = null; }
   if (tgt) { const f = tgt === mt ? fieldTo(tgt.x, tgt.y) : fieldTeam('foes0', o => o.team !== 0 && !o.dead); const s = stepField(e, f, true); if (s) return s; if (tgt !== mt) { const s2 = stepField(e, fieldTo(tgt.x, tgt.y), true); if (s2) return s2; } }
   return keepFormation(e);
 }
