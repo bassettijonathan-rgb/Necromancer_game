@@ -6,7 +6,7 @@ export const W = 84, H = 56, N = W * H;
 export const ROCK = 0, BRICK = 1, FLOOR = 2, DIRT = 3, GRASS = 4, GRAVE = 5, TREE = 6, WATER = 7, DOOR = 8, CAVE = 9, RUBBLE = 10, SARC = 11, PILLAR = 12,
   OGRAVE = 13, PATH = 14, BRAZ = 15, FWALL = 16, FOUND = 17, SEAL = 18, CRADLE = 19, ALTAR = 20, ASH = 21;
 export const OPQ = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0];
-export const BLK = [1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0];
+export const BLK = [1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0];
 export const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
 export const LEVEL_ARRAYS = ['map', 'outdoor', 'deco', 'seen', 'zone', 'solid'];
 

@@ -136,9 +136,9 @@ export function buildRealMap() {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const i = I(x, y), t = map[i], X = x * B, Y = y * B; rs = (x * 31337 + y * 7331 + S.seed) >>> 0;
     if (t === GRAVE) {
-      g.fillStyle = 'rgba(30,24,18,.55)'; g.beginPath(); g.ellipse(X + B * .5, Y + B * .78, B * .3, B * .17, 0, 0, Math.PI * 2); g.fill();
-      g.fillStyle = 'rgba(0,0,0,.55)'; ell(g, X + B * .55, Y + B * .6, B * .3, B * .1);
-      const cross = hash(x, y, 90) < .3, tilt = (lr() - .5) * .22, broken = lr() < .2; g.save(); g.translate(X + B * .5, Y + B * .62); g.rotate(tilt);
+      g.fillStyle = 'rgba(30,24,18,.55)'; g.beginPath(); g.ellipse(X + B * .5, Y + B * .66, B * .26, B * .2, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(0,0,0,.5)'; ell(g, X + B * .55, Y + B * .42, B * .26, B * .08);
+      const cross = hash(x, y, 90) < .3, tilt = (lr() - .5) * .22, broken = lr() < .2; g.save(); g.translate(X + B * .5, Y + B * .42); g.scale(.85, .85); g.rotate(tilt);
       const gr = g.createLinearGradient(-B * .2, -B * .5, B * .2, 0); gr.addColorStop(0, '#7a7872'); gr.addColorStop(1, '#3e3c3a'); g.fillStyle = gr;
       g.beginPath(); if (cross) { g.rect(-B * .05, -B * .52, B * .1, B * .52); g.rect(-B * .18, -B * .4, B * .36, B * .09); }
       else { g.moveTo(-B * .17, 0); g.lineTo(-B * .17, -B * .3); if (broken) { g.lineTo(-B * .05, -B * .42); g.lineTo(B * .06, -B * .34); g.lineTo(B * .17, -B * .4); } else g.arc(0, -B * .3, B * .17, Math.PI, 0); g.lineTo(B * .17, 0); g.closePath(); }
