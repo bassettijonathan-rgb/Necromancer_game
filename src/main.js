@@ -4,7 +4,6 @@ import { onEvent, log } from './core/events.js';
 import { I, cheb, findFree, vis } from './core/level.js';
 import { isMinion, setPos, mkItem, hostile, seesE, displayName } from './core/rules.js';
 import { cap1 } from './core/content.js';
-import { doMoveDir } from './core/actions.js';
 import { newGame, newStressGame, serialize, deserialize, saveSummary } from './core/game.js';
 import { computeFOV } from './core/level.js';
 import { playerAct, isBusy, intentStep, startExplore, stopIntents, RT, rtTick, playerReady } from './core/clock.js';
@@ -18,7 +17,8 @@ import { RS, QL, q, $ } from './render/rstate.js';
 import { initHUD, hud, resetHUD, drawMinimap } from './ui/hud.js';
 import { initWindows, showLoot, closeLoot, closePack, updateTip, packOpen, lootSrc } from './ui/windows.js';
 import { initModals, setModalActions, showModal, closeModal, showReading, showDeath, helpHTML, showTitle, confirmStress, confirmNew, notice } from './ui/modals.js';
-import { initInput, heldDir } from './ui/input.js';
+import { initInput } from './ui/input.js';
+import { walk, glide, placeWalker } from './ui/walk.js';
 import { setAuto, setAnim, RTQ, SPEEDS, setMode, setSpeed, setPaused } from './ui/control.js';
 import { Store, initStorage, saveLocal, loadLocal, loadAccount, saveAccount, exportFile, importFile } from './ui/storage.js';
 
@@ -26,6 +26,7 @@ import { Store, initStorage, saveLocal, loadLocal, loadAccount, saveAccount, exp
 function onLevelBound() {
   buildRealMap(); rebuildLights(); resetFX(); clearSprites();
   for (const e of S.ents) dressEnt(e);
+  placeWalker();
   if (S.player) { RS.camX = S.player.x + .5; RS.camY = S.player.y + .5; }
   RS.selMinion = null; closeLoot(); closePack(); foeSeen.clear(); setPaused(false); RTQ.fn = null;
   resetHUD(); hud();
@@ -104,16 +105,18 @@ function checkNewFoes() {
   }
   if (fresh && !S.stress && !RS.auto) { stopIntents(); setPaused(true, `${cap1(displayName(fresh))} in sight`); }
 }
-// your act when you are ready: autoplay, then what you asked for, then the keys you hold, then whatever you set in motion
+// your act when you are ready: autoplay, then what you asked for, then whatever you set in motion (walking is in walk.js)
 function rtPlayer() {
   if (RS.auto) { playerAct(() => autoAct() || 100); return; }
   if (RTQ.fn) { const f = RTQ.fn; RTQ.fn = null; if (playerAct(f)) return; }
-  const d = heldDir(); if (d) { stopIntents(); playerAct(() => doMoveDir(d[0], d[1])); return; }
   intentStep();
 }
 let simAcc = 0;
+const rtRunning = () => !(RS.modalOpen || S.gameOver || RS.paused || packOpen || lootSrc);
+const turnSec = () => SPEEDS[RS.speed] / (S.intent.rest ? 5 : 1);
 function rtAdvance(dt) {
-  if (RS.modalOpen || S.gameOver || RS.paused || packOpen || lootSrc) { simAcc = 0; return; }
+  if (!rtRunning()) { simAcc = 0; return; }
+  walk(dt, turnSec());
   const tickSec = SPEEDS[RS.speed] / 10; simAcc += dt * (S.intent.rest ? 5 : 1);
   let n = 0;
   while (simAcc >= tickSec && n++ < 60) {
@@ -134,9 +137,14 @@ function frame(now) {
   runFXQ(); if (FX.hitStop > 0) { FX.hitStop -= dt; dt *= .12; }
   // moves resolved this turn play out over a few frames
   const k = 1 - Math.exp(-dt * (RT.on ? 20 : RS.animFast ? 40 : 14)), ka = Math.exp(-dt * 12);
-  for (const e of S.ents) { e.rx += (e.x - e.rx) * k; e.ry += (e.y - e.ry) * k; e.ax *= ka; e.ay *= ka; if (e.flash > 0) e.flash -= dt; }
+  const pl = S.player, ts = turnSec();
+  for (const e of S.ents) {
+    if (!RT.on) { e.rx += (e.x - e.rx) * k; e.ry += (e.y - e.ry) * k; } else if (e !== pl) glide(e, dt, ts);
+    e.ax *= ka; e.ay *= ka; if (e.flash > 0) e.flash -= dt;
+  }
+  if (RT.on && !rtRunning()) walk(dt, ts, true); // stopped: a step under way still finishes
   for (const e of ghosts) { e.rx += (e.x - e.rx) * k; e.ry += (e.y - e.ry) * k; e.ax *= ka; e.ay *= ka; if (e.flash > 0) e.flash -= dt; }
-  const pl = S.player; { const ck = 1 - Math.exp(-dt * 5); RS.camX += (pl.rx + .5 - RS.camX) * ck; RS.camY += (pl.ry + .5 - RS.camY) * ck; }
+  { const ck = 1 - Math.exp(-dt * 5); RS.camX += (pl.rx + .5 - RS.camX) * ck; RS.camY += (pl.ry + .5 - RS.camY) * ck; }
   updateParticles(dt); updateFX(dt);
   // stepping: autoplay, walking, exploring, resting
   const T0 = performance.now();
@@ -187,7 +195,9 @@ window.__necro = {
   newRegion(sd) { newGame(sd); }, startStress() { newStressGame(); setAuto(true); }, setAuto, closeModal, setMode, setPaused, get paused() { return RS.paused; }, get rt() { return RT.on; },
   get modal() { return RS.modalOpen; }, folio: () => $('#folio').innerText,
   click(act) { const b = $(`#folio [data-act="${act}"]`); if (b) b.click(); return !!b; },
-  tp(x, y, army) { const p = S.player, qq = findFree(x, y, 3); setPos(p, qq[0], qq[1]); p.rx = qq[0]; p.ry = qq[1]; RS.camX = qq[0] + .5; RS.camY = qq[1] + .5; if (army) for (const m of S.ents) if (isMinion(m)) { const r = findFree(qq[0], qq[1], 4); setPos(m, r[0], r[1]); m.rx = r[0]; m.ry = r[1]; } computeFOV(); },
+  tp(x, y, army) { const p = S.player, qq = findFree(x, y, 3); setPos(p, qq[0], qq[1]); placeWalker(); RS.camX = qq[0] + .5; RS.camY = qq[1] + .5; if (army) for (const m of S.ents) if (isMinion(m)) { const r = findFree(qq[0], qq[1], 4); setPos(m, r[0], r[1]); m.rx = r[0]; m.ry = r[1]; } computeFOV(); },
+  get pos() { const p = S.player; return p && { x: p.x, y: p.y, px: +(p.px ?? 0).toFixed(3), py: +(p.py ?? 0).toFixed(3), energy: p.energy }; },
+  foes: () => S.ents.filter(e => hostile(S.player, e)).map(e => ({ x: e.x, y: e.y, type: e.type, aware: !!e.aware })),
   explore() { return startExplore(); }, G: () => S.G,
   formation() { const ms = S.ents.filter(isMinion); return { n: ms.length, max: Math.max(0, ...ms.map(m => cheb(m, S.player))) }; },
   addItem(b, qq) { S.player.pack.push(mkItem(b, qq || 0)); },

@@ -26,6 +26,8 @@ export function manual(fn) {
   if (RT.on && !playerReady()) { RTQ.fn = fn; return true; }
   RTQ.fn = null; return playerAct(fn);
 }
+// you take over without acting yet (real time: you start walking)
+export function takeHand() { if (RS.modalOpen || S.gameOver) return; if (RS.auto) { setAuto(false); log('You take control. Press P to hand it back.'); } stopIntents(); }
 export function castKey(k) { if (!S.learned[k]) return; manual(SPELLFN[k]); }
 export const BELT = [['bandage', '5'], ['wine', '6'], ['salt', '7']];
 export function useBelt(b) { const it = pack().find(k => k.b === b); if (!it) { log(`You have no ${GEAR[b].n}.`); return; } manual(() => doUse(it)); }

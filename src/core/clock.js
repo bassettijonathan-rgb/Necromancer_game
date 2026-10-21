@@ -23,6 +23,8 @@ export function playerAct(fn) {
   if (RT.on) { computeFOV(); resolved(); } else afterPlayer();
   return true;
 }
+// real time: a step taken in passing between acts; it costs nothing on the clock, but the world still answers it
+export function playerShift(fn) { if (S.gameOver || busy) return false; fn(); computeFOV(); resolved(); return true; }
 export const playerReady = () => !S.gameOver && S.player.energy >= 100;
 // one tick of real time; whoever drives it gives the player their act first, when they are ready
 export function rtTick() {

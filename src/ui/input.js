@@ -6,7 +6,7 @@ import { clamp } from '../core/rng.js';
 import { hostile, seesE, chestAt, openChest } from '../core/rules.js';
 import { doMoveDir, doBolt, doOrder, doHood, raiseAt, setAutoRaise } from '../core/actions.js';
 import { startExplore, startRest, stopIntents, RT } from '../core/clock.js';
-import { manual, castKey, setAuto, setAnim, useBelt, BELT, cycleTarget, travelTo, setMode, setPaused, setSpeed } from './control.js';
+import { manual, takeHand, castKey, setAuto, setAnim, useBelt, BELT, cycleTarget, travelTo, setMode, setPaused, setSpeed } from './control.js';
 import { togglePack, closePack, packOpen, lootSrc, closeLoot, lootAll, lootHere, showLoot, setMouse } from './windows.js';
 import { showModal, closeModal, helpHTML } from './modals.js';
 import { RS, $ } from '../render/rstate.js';
@@ -38,7 +38,7 @@ function onKey(ev) {
   if (c === 'KeyK') { setMode(!RT.on); return; }
   if (c === 'BracketLeft') { setSpeed(RS.speed - 1); return; } if (c === 'BracketRight') { setSpeed(RS.speed + 1); return; }
   if (RT.on && c === 'Space') { ev.preventDefault(); if (!ev.repeat) setPaused(!RS.paused); return; }
-  if (RT.on && KEYS[c]) { ev.preventDefault(); if (ev.repeat) return; held.add(c); manual(() => doMoveDir(KEYS[c][0], KEYS[c][1])); return; }
+  if (RT.on && KEYS[c]) { ev.preventDefault(); if (ev.repeat) return; held.add(c); takeHand(); return; }
   if (c === 'KeyG') { if (S.learned.raise) setAutoRaise(!S.autoRaise); return; }
   if (c === 'Escape') { if (lootSrc) { closeLoot(); return; } if (packOpen) { closePack(); return; } stopIntents(); return; }
   const now = performance.now();
