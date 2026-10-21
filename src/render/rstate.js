@@ -2,7 +2,7 @@
 export const RS = {
   DPR: 1, CW: 1, CH: 1, camX: 0, camY: 0, zoom: 1,
   qLevel: 0, qLock: -1,
-  animFast: false, auto: false,
+  animFast: false, auto: false, paused: false, pauseWhy: '', speed: 2,
   hover: null, showThreat: false, showMarks: false, selMinion: null,
   modalOpen: false, view: { s: 1, ox: 0, oy: 0 },
 };

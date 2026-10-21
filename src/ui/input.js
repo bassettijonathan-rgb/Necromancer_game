@@ -5,8 +5,8 @@ import { I, inb, occ, seen, vis, map, BLK, cheb } from '../core/level.js';
 import { clamp } from '../core/rng.js';
 import { hostile, seesE, chestAt, openChest } from '../core/rules.js';
 import { doMoveDir, doBolt, doOrder, doHood, raiseAt, setAutoRaise } from '../core/actions.js';
-import { startExplore, startRest, stopIntents } from '../core/clock.js';
-import { manual, castKey, setAuto, setAnim, useBelt, BELT, cycleTarget, travelTo } from './control.js';
+import { startExplore, startRest, stopIntents, RT } from '../core/clock.js';
+import { manual, castKey, setAuto, setAnim, useBelt, BELT, cycleTarget, travelTo, setMode, setPaused, setSpeed } from './control.js';
 import { togglePack, closePack, packOpen, lootSrc, closeLoot, lootAll, lootHere, showLoot, setMouse } from './windows.js';
 import { showModal, closeModal, helpHTML } from './modals.js';
 import { RS, $ } from '../render/rstate.js';
@@ -16,6 +16,9 @@ const KEYS = { ArrowUp: [0, -1], KeyW: [0, -1], Numpad8: [0, -1], ArrowDown: [0,
   KeyQ: [-1, -1], Numpad7: [-1, -1], KeyE: [1, -1], Numpad9: [1, -1], KeyZ: [-1, 1], Numpad1: [-1, 1], KeyC: [1, 1], Numpad3: [1, 1] };
 const SPKEY = { KeyR: 'raise', KeyF: 'bolt', KeyX: 'burst', KeyB: 'breath', KeyM: 'mark', KeyL: 'lantern' };
 let lastKey = 0;
+// real time: the direction keys you are holding down
+const held = new Set();
+export function heldDir() { let dx = 0, dy = 0; for (const c of held) { dx += KEYS[c][0]; dy += KEYS[c][1]; } return dx || dy ? [Math.sign(dx), Math.sign(dy)] : null; }
 const toggleExplore = () => { if (S.intent.explore) S.intent.explore = false; else { if (RS.auto) setAuto(false); startExplore(); } };
 const zoomBy = f => { RS.zoom = clamp(RS.zoom * f, .55, 2.4); };
 
@@ -32,6 +35,10 @@ function onKey(ev) {
   if (c === 'Equal' || c === 'NumpadAdd') { zoomBy(1.11); return; } if (c === 'Minus' || c === 'NumpadSubtract') { zoomBy(.9); return; }
   if (c === 'Tab') { ev.preventDefault(); RS.showMarks = !RS.showMarks; return; }
   if (c === 'KeyN') { cycleTarget(); return; }
+  if (c === 'KeyK') { setMode(!RT.on); return; }
+  if (c === 'BracketLeft') { setSpeed(RS.speed - 1); return; } if (c === 'BracketRight') { setSpeed(RS.speed + 1); return; }
+  if (RT.on && c === 'Space') { ev.preventDefault(); if (!ev.repeat) setPaused(!RS.paused); return; }
+  if (RT.on && KEYS[c]) { ev.preventDefault(); if (ev.repeat) return; held.add(c); manual(() => doMoveDir(KEYS[c][0], KEYS[c][1])); return; }
   if (c === 'KeyG') { if (S.learned.raise) setAutoRaise(!S.autoRaise); return; }
   if (c === 'Escape') { if (lootSrc) { closeLoot(); return; } if (packOpen) { closePack(); return; } stopIntents(); return; }
   const now = performance.now();
@@ -71,13 +78,14 @@ function toggleFull() {
 
 export function initInput(onResize, onStress, onExport) {
   addEventListener('keydown', onKey);
+  addEventListener('keyup', ev => held.delete(ev.code)); addEventListener('blur', () => held.clear());
   cv.addEventListener('click', onClick);
   cv.addEventListener('contextmenu', onRightClick);
   cv.addEventListener('mousemove', ev => { const r = cv.getBoundingClientRect(); setMouse([ev.clientX - r.left, ev.clientY - r.top]); });
   cv.addEventListener('mouseleave', () => setMouse(null));
   cv.addEventListener('wheel', ev => { ev.preventDefault(); zoomBy(ev.deltaY > 0 ? .9 : 1.11); }, { passive: false });
   $('#bAuto').onclick = () => setAuto(!RS.auto); $('#bAnim').onclick = () => setAnim(!RS.animFast); $('#bHelp').onclick = () => showModal(helpHTML(false));
-  $('#bFull').onclick = toggleFull; $('#bPack').onclick = togglePack; $('#bExplore').onclick = toggleExplore; $('#bStress').onclick = onStress; $('#bSave').onclick = onExport;
+  $('#bFull').onclick = toggleFull; $('#bPack').onclick = togglePack; $('#bExplore').onclick = toggleExplore; $('#bStress').onclick = onStress; $('#bSave').onclick = onExport; $('#bMode').onclick = () => setMode(!RT.on); $('#bSpeed').onclick = () => setSpeed(RS.speed >= 4 ? 0 : RS.speed + 1);
   const syncFull = () => { $('#bFull').textContent = fsEl() ? 'Exit fullscreen' : 'Fullscreen'; $('#bFull').classList.toggle('hot', !!fsEl()); setTimeout(onResize, 50); };
   document.addEventListener('fullscreenchange', syncFull); document.addEventListener('webkitfullscreenchange', syncFull);
   addEventListener('resize', onResize);

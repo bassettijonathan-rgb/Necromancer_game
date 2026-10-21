@@ -1,6 +1,7 @@
 // Effects: particles, blows, explosions. The rules resolve a turn at once; this side plays it back in order, with weight.
 import { S } from '../core/state.js';
 import { onEvent } from '../core/events.js';
+import { RT } from '../core/clock.js';
 import { I, vis, dist } from '../core/level.js';
 import { living } from '../core/rules.js';
 import { stampBlood, stampScorch, artOpenGrave, artOpenSeal } from './mapart.js';
@@ -41,7 +42,8 @@ export let projs = [], blasts = [], columns = [], rings = [], pulses = [], ghost
 export const FX = { shake: 0, screenFlash: null, hitStop: 0 };
 // impact queue: each blow of the turn lands in order, a beat apart
 const FXQ = []; let fxDelay = 0, hitAt = null, hitFrom = null, curFxT = 0;
-function fxStep() { const st = S.stress ? 6 : RS.animFast ? 22 : 70, cap = S.stress ? 120 : RS.animFast ? 300 : 900; fxDelay = Math.min(fxDelay + st, cap); }
+// in real time the world already arrives at the speed you watch it, so blows land as they happen
+function fxStep() { if (RT.on) return; const st = S.stress ? 6 : RS.animFast ? 22 : 70, cap = S.stress ? 120 : RS.animFast ? 300 : 900; fxDelay = Math.min(fxDelay + st, cap); }
 function fxAt(ms, fn) { FXQ.push({ at: performance.now() + ms, fn }); }
 export function runFXQ() { if (!FXQ.length) return; const now = performance.now(); for (let i = 0; i < FXQ.length; i++) { const qq = FXQ[i]; if (qq.at <= now) { FXQ.splice(i, 1); i--; qq.fn(); } } }
 const onScreen = t => vis[I(t.x, t.y)];

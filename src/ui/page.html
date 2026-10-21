@@ -187,6 +187,9 @@ kbd{font:500 10px var(--f-mono);color:var(--dim);border:1px solid var(--edge);bo
 .folio .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
 .folio .row .btn{border-color:var(--edge);color:var(--bone)}
 .folio .row .btn.primary{color:var(--soul);border-color:rgba(143,232,172,.45)}
+#pause{position:absolute;left:50%;top:76px;transform:translateX(-50%);z-index:4;padding:8px 14px;font:500 12px/1 var(--f-mono);color:var(--dim);background:rgba(8,6,9,.86);border:1px solid var(--edge);border-radius:2px;pointer-events:none;display:flex;gap:8px;align-items:center}
+#pause b{font:400 15px/1 var(--f-display);letter-spacing:.08em;color:var(--bone)}
+#pause[hidden]{display:none}
 #load{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:var(--void);font:400 20px var(--f-display);color:var(--dim);letter-spacing:.06em}
 @media (max-width:1240px){
   .bottom{grid-template-columns:auto;justify-content:center}
@@ -215,6 +218,8 @@ kbd{font:500 10px var(--f-mono);color:var(--dim);border:1px solid var(--edge);bo
       <button class="btn" id="bExplore" title="Walk to the nearest unexplored place (O)">Explore <kbd>O</kbd></button>
       <button class="btn" id="bPack" title="Your pack and your dead's gear (I)">Pack <kbd>I</kbd></button>
       <button class="btn" id="bAuto" title="Let the bot play (P)">Autoplay <kbd>P</kbd></button>
+      <button class="btn" id="bMode" title="Real time or turns (K)">Real time <kbd>K</kbd></button>
+      <button class="btn" id="bSpeed" title="How fast the world runs in real time ([ and ])">Speed: normal <kbd>[ ]</kbd></button>
       <button class="btn" id="bAnim" title="How army turns play out (Y)">Army: animate <kbd>Y</kbd></button>
       <button class="btn" id="bSave" data-tip="sys:save">Save</button>
       <button class="btn" id="bStress" title="Explosion and horde test for frame rate">Stress test</button>
@@ -245,6 +250,7 @@ kbd{font:500 10px var(--f-mono);color:var(--dim);border:1px solid var(--edge);bo
   <div id="utip" class="panel" hidden></div>
   <div id="tip" class="panel" hidden></div>
   <div id="modal" hidden><div class="folio" id="folio" role="dialog" aria-modal="true"></div></div>
+  <div id="pause" hidden></div>
   <div id="load">The dead are being counted…</div>
 </div>
 <script>

@@ -36,7 +36,7 @@ export function buildSpellBar(newOne) {
     b.innerHTML = `${ico(k)}<kbd>${sp.key}</kbd><small class="${sp.blood ? 'bl' : ''}">${sp.blood || sp.cost}</small>`; b.setAttribute('aria-label', sp.name); b.onclick = () => castKey(k); box.appendChild(b);
   }
   const misc = $('#misc'); misc.innerHTML = '';
-  for (const [k, key, fn, tip] of [['wait', 'Spc', () => manual(() => 100), 'wait'], ['rest', 'T', () => { if (RS.auto) setAuto(false); startRest(); }, 'rest'], ['pack', 'I', () => togglePack(), 'pack']]) {
+  for (const [k, key, fn, tip] of [['wait', '.', () => manual(() => 100), 'wait'], ['rest', 'T', () => { if (RS.auto) setAuto(false); startRest(); }, 'rest'], ['pack', 'I', () => togglePack(), 'pack']]) {
     const b = document.createElement('button'); b.className = 'slot'; b.dataset.tip = 'misc:' + tip; b.innerHTML = `${ico(k)}<kbd>${key}</kbd>`; b.onclick = fn; misc.appendChild(b);
   }
   spellKnownSig = Object.keys(S.learned).join();

@@ -12,11 +12,24 @@ import { isDeadType } from './content.js';
 let busy = false;
 export const isBusy = () => busy;
 
+// In turns, the world waits for you: each act of yours runs the world until you can act again.
+// In real time, the world runs tick by tick at a fixed rate (rtTick) and you act whenever you are ready.
+export const RT = { on: false };
 // returns true if the action took time
 export function playerAct(fn) {
   if (S.gameOver || busy) return false; emit('act');
   const cost = fn(); if (!cost) return false;
-  S.player.energy -= cost; afterPlayer(); return true;
+  S.player.energy -= cost;
+  if (RT.on) { computeFOV(); resolved(); } else afterPlayer();
+  return true;
+}
+export const playerReady = () => !S.gameOver && S.player.energy >= 100;
+// one tick of real time; whoever drives it gives the player their act first, when they are ready
+export function rtTick() {
+  if (S.gameOver || busy) return;
+  busy = true; tick(); busy = false;
+  const pl = S.player; if (pl.energy > 100) pl.energy = 100; // standing idle banks nothing
+  if (S.tickN % 10 === 0) { computeFOV(); resolved(); }
 }
 function afterPlayer() {
   busy = true; let g = 0;

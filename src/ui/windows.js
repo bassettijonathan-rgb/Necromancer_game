@@ -143,7 +143,7 @@ const STANCETXT = { defensive: 'Your dead keep a ring around you and move with y
 function uiTip(key) {
   const [a, b, c] = key.split(':'); const pl = S.player;
   if (a === 'spell') { const sp = SP[b]; return `<h3>${sp.name}</h3><div class="st">${sp.blood ? `costs ${sp.blood} blood` : `costs ${sp.cost} will${b === 'raise' ? ' for each body' : ''}`} · key ${sp.key}</div><p>${sp.text}</p>${b === 'raise' ? `<p class="hint">Automatic raising is ${S.autoRaise ? 'on' : 'off'} (G). Right-click a body or grave to raise that one.</p>` : ''}`; }
-  if (a === 'misc') return { wait: '<h3>Wait</h3><p>Let a turn pass.</p><p class="hint">Space</p>', rest: '<h3>Rest</h3><p>Sit among your dead until you are healed or something comes.</p><p class="hint">T</p>', pack: '<h3>Pack</h3><p>What you carry, what you wear, and the gear of your dead.</p><p class="hint">I</p>' }[b];
+  if (a === 'misc') return { wait: '<h3>Wait</h3><p>Let a moment pass.</p><p class="hint">Period, or Space in turns</p>', rest: '<h3>Rest</h3><p>Sit among your dead until you are healed or something comes.</p><p class="hint">T</p>', pack: '<h3>Pack</h3><p>What you carry, what you wear, and the gear of your dead.</p><p class="hint">I</p>' }[b];
   if (a === 'belt') { const n = pack().filter(i => i.b === b).length; return itemTipHTML(mkItemView(b), `${n} carried · key ${BELT.find(x => x[0] === b)[1]}`); }
   if (a === 'stance') return `<h3>${cap1(b)}</h3><p>${STANCETXT[b]}</p><p class="hint">Key ${STANCES.find(x => x[0] === b)[2]} · a quarter of a turn</p>`;
   if (a === 'minion') { const m = S.ents.find(e => e.id === +b); return m ? creatureTip(m) + '<p class="hint">Click to select it and see its gear.</p>' : null; }
