@@ -17,7 +17,7 @@ import { initHUD, hud, resetHUD, drawMinimap } from './ui/hud.js';
 import { initWindows, showLoot, closeLoot, closePack, updateTip, packOpen, lootSrc } from './ui/windows.js';
 import { initModals, setModalActions, showModal, closeModal, showReading, showDeath, helpHTML, showTitle, confirmStress, confirmNew, notice } from './ui/modals.js';
 import { initInput } from './ui/input.js';
-import { walk, glide, placeWalker } from './ui/walk.js';
+import { walk, glide, placeWalker, WALK } from './ui/walk.js';
 import { setAuto, setAnim, RTQ, SPEEDS, setMode, setSpeed, setPaused } from './ui/control.js';
 import { Store, initStorage, saveLocal, loadLocal, loadAccount, saveAccount, exportFile, importFile } from './ui/storage.js';
 
@@ -98,7 +98,9 @@ setModalActions({
 function rtPlayer() {
   if (RS.auto) { playerAct(() => autoAct() || 100); return; }
   if (RTQ.fn) { const f = RTQ.fn; RTQ.fn = null; if (playerAct(f)) return; }
-  intentStep();
+  // a step you set in motion (clicked walk, explore) goes at your walking pace, not a turn's
+  const pl = S.player, x = pl.x, y = pl.y, e0 = pl.energy; intentStep();
+  if ((pl.x !== x || pl.y !== y) && pl.energy < e0) pl.energy += (e0 - pl.energy) * (1 - 1 / WALK);
 }
 let simAcc = 0;
 const rtRunning = () => !(RS.modalOpen || S.gameOver || RS.paused || packOpen || lootSrc);

@@ -2,7 +2,7 @@
 // Your body has a place of its own between tiles (px, py: tile units, tile centres at .5); the rules still
 // see the tile under its centre, and you change tiles as you cross into them.
 import { S } from '../core/state.js';
-import { I, inb, occ, canWalk, map, GRAVE, SEAL, WATER } from '../core/level.js';
+import { I, inb, occ, canWalk, map, SEAL, WATER } from '../core/level.js';
 import { clamp } from '../core/rng.js';
 import { hostile, isMinion, effSpeed, chestAt, swapPos, moveTo } from '../core/rules.js';
 import { doMoveDir } from '../core/actions.js';
@@ -10,6 +10,7 @@ import { playerAct, playerShift, playerReady } from '../core/clock.js';
 import { heldDir } from './input.js';
 
 const R = .28; // the radius of your body, in tiles
+export const WALK = 1.6; // in real time you walk this many tiles in the time a turn's step takes
 export function placeWalker() { const pl = S.player; if (!pl) return; pl.px = pl.x + .5; pl.py = pl.y + .5; pl.rx = pl.x; pl.ry = pl.y; pl.settle = false; }
 
 // what stops your body moving to (cx, cy): walls at its edge (only when it would press further in), creatures and chests at its centre
@@ -34,7 +35,7 @@ function bumpInto(b) {
   if (key === lastBump) return;
   const t = map[I(b.x, b.y)];
   if (chestAt(b.x, b.y)) { if (!playerReady()) return; playerAct(() => doMoveDir(dx, dy)); }
-  else if ((t === GRAVE && !S.flags.graveHint) || (t === SEAL && !S.flags.sealTouched)) doMoveDir(dx, dy);
+  else if (t === SEAL && !S.flags.sealTouched) doMoveDir(dx, dy);
   lastBump = key;
 }
 // one frame of walking; turnSec is how long a turn of the world lasts right now
@@ -42,7 +43,7 @@ export function walk(dt, turnSec, still) {
   const pl = S.player; if (pl.px === undefined) placeWalker();
   const d = still ? null : heldDir();
   // a tile per turn at your speed, slower in water, and slower still while you recover from an act
-  let v = effSpeed(pl) / 100 / turnSec; if (map[I(pl.x, pl.y)] === WATER) v /= 1.5;
+  let v = effSpeed(pl) / 100 * WALK / turnSec; if (map[I(pl.x, pl.y)] === WATER) v /= 1.5;
   // the rules moved you (a walk you set in motion, autoplay, a swap): glide there, to the centre of the tile,
   // or just inside it when you take over with the keys
   if (Math.floor(pl.px) !== pl.x || Math.floor(pl.py) !== pl.y) pl.settle = true;
