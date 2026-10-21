@@ -139,7 +139,7 @@ export function lootHere() {
 
 /* ---------- tooltips for the interface ---------- */
 export const STANCES = [['defensive', 'Defensive', '1'], ['aggressive', 'Aggressive', '2'], ['hold', 'Hold', '3']];
-const STANCETXT = { defensive: 'Your dead keep a ring around you and move with you. They leave it only for enemies that attack you or them.', aggressive: 'Your dead keep a ring around you and move with you. They also go for any enemy that comes within five paces of you.', hold: 'Your dead stay where they stand until you give another order.' };
+const STANCETXT = { defensive: 'Your dead keep a ring around you and move with you. They leave it only for enemies that attack you or them.', aggressive: 'Your dead keep a ring around you and move with you. They also go for any enemy that comes within nine paces of you.', hold: 'Your dead stay where they stand until you give another order.' };
 function uiTip(key) {
   const [a, b, c] = key.split(':'); const pl = S.player;
   if (a === 'spell') { const sp = SP[b]; return `<h3>${sp.name}</h3><div class="st">${sp.blood ? `costs ${sp.blood} blood` : `costs ${sp.cost} will${b === 'raise' ? ' for each body' : ''}`} · key ${sp.key}</div><p>${sp.text}</p>${b === 'raise' ? `<p class="hint">Automatic raising is ${S.autoRaise ? 'on' : 'off'} (G). Right-click a body or grave to raise that one.</p>` : ''}`; }
