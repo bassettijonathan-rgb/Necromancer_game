@@ -43,7 +43,7 @@ export let dynLights = [];
 export function buildDynLights(t) {
   dynLights = [];
   const pl = S.player; if (!pl) return;
-  dynLights.push({ x: pl.rx + .5, y: pl.ry + .5, r: S.hooded ? 2.4 : 8.5, c: V.lantern, I: (S.hooded ? .5 : 1.45) * (1 + .06 * Math.sin(t * 2.3)), k: 'lantern', pri: 99 });
+  dynLights.push({ x: pl.rx + .5, y: pl.ry + .5, r: S.hooded ? 2.4 : V.lanternR, c: V.lantern, I: (S.hooded ? .5 : V.lanternI) * (1 + .06 * Math.sin(t * 2.3)), k: 'lantern', pri: 99 });
   for (const e of S.ents) {
     if (e.dead || e === pl) continue; const x = e.rx + .5, y = e.ry + .5;
     if (e.light) {
@@ -66,7 +66,7 @@ export function computeHi(t) {
   const px = S.player.x, py = S.player.y;
   for (let i = 0; i < HN; i++) {
     const ti = HT[i]; if (!vis[ti]) { HR[i] = HG[i] = HB[i] = 0; continue; }
-    if (outdoor[ti]) { HR[i] = V.moon[0]; HG[i] = V.moon[1]; HB[i] = V.moon[2]; } else if (zone[ti] >= 4) { HR[i] = .026; HG[i] = .03; HB[i] = .038; } else { HR[i] = .02; HG[i] = .018; HB[i] = .026; }
+    const a = outdoor[ti] ? V.moon : zone[ti] >= 4 ? V.deep : V.inside; HR[i] = a[0]; HG[i] = a[1]; HB[i] = a[2];
   }
   const SL = S.staticLights;
   for (let n = 0; n < SL.length; n++) {
