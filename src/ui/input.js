@@ -51,7 +51,10 @@ function onClick(ev) {
   if (o && hostile(pl, o) && seesE(o)) { S.target = o; manual(() => cheb(o, pl) <= 1 ? doMoveDir(Math.sign(o.x - pl.x), Math.sign(o.y - pl.y)) : doBolt(o)); return; }
   const ch = chestAt(p[0], p[1]); if (ch && seen[I(p[0], p[1])]) { if (cheb(ch, pl) <= 1) { manual(() => openChest(ch)); return; } travelTo(ch.x, ch.y, ch); return; }
   const kc = S.corpses.find(k => k.x === p[0] && k.y === p[1] && vis[I(k.x, k.y)] && k.gear && (k.gear.hand || k.gear.body || k.gear.head)); if (kc && cheb(kc, pl) <= 1) { showLoot({ kind: 'corpse', k: kc }); return; }
-  if (!seen[I(p[0], p[1])] || BLK[map[I(p[0], p[1])]]) return; travelTo(p[0], p[1]);
+  if (!seen[I(p[0], p[1])]) return;
+  // something solid there (a tree, a wall): walk to the open spot beside it nearest you
+  if (BLK[map[I(p[0], p[1])]]) { let best = null, bd = 1e9; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = p[0] + dx, y = p[1] + dy; if (!inb(x, y) || !seen[I(x, y)] || BLK[map[I(x, y)]]) continue; const d = Math.hypot(x - pl.x, y - pl.y); if (d < bd) { bd = d; best = [x, y]; } } if (best) travelTo(best[0], best[1]); return; }
+  travelTo(p[0], p[1]);
 }
 function onRightClick(ev) { ev.preventDefault(); if (RS.modalOpen || S.gameOver || !S.player) return; const p = tileAt(ev); if (!inb(p[0], p[1])) return; manual(() => raiseAt(p[0], p[1])); }
 
