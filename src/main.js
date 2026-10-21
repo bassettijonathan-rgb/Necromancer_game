@@ -186,6 +186,7 @@ window.__necro = {
   click(act) { const b = $(`#folio [data-act="${act}"]`); if (b) b.click(); return !!b; },
   tp(x, y, army) { const p = S.player, qq = findFree(x, y, 3); setPos(p, qq[0], qq[1]); placeWalker(); RS.camX = qq[0] + .5; RS.camY = qq[1] + .5; if (army) for (const m of S.ents) if (isMinion(m)) { const r = findFree(qq[0], qq[1], 4); setPos(m, r[0], r[1]); m.rx = r[0]; m.ry = r[1]; } computeFOV(); },
   get pos() { const p = S.player; return p && { x: p.x, y: p.y, px: +(p.px ?? 0).toFixed(3), py: +(p.py ?? 0).toFixed(3), energy: p.energy }; },
+  poses: () => S.ents.map(e => ({ t: e.type, wamp: +(e.wamp || 0).toFixed(2), wph: +(e.wph || 0).toFixed(2), atk: e.atkAt ? Math.round(performance.now() - e.atkAt) : null })),
   foes: () => S.ents.filter(e => hostile(S.player, e)).map(e => ({ x: e.x, y: e.y, type: e.type, aware: !!e.aware })),
   explore() { return startExplore(); }, G: () => S.G,
   formation() { const ms = S.ents.filter(isMinion); return { n: ms.length, max: Math.max(0, ...ms.map(m => cheb(m, S.player))) }; },
