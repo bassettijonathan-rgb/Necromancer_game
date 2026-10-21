@@ -1,12 +1,11 @@
 // The page: boot, the title screen, the frame loop, autosave, and the test hooks.
 import { S } from './core/state.js';
 import { onEvent, log } from './core/events.js';
-import { I, cheb, findFree, vis } from './core/level.js';
-import { isMinion, setPos, mkItem, hostile, seesE, displayName } from './core/rules.js';
-import { cap1 } from './core/content.js';
+import { I, cheb, findFree } from './core/level.js';
+import { isMinion, setPos, mkItem, hostile } from './core/rules.js';
 import { newGame, newStressGame, serialize, deserialize, saveSummary } from './core/game.js';
 import { computeFOV } from './core/level.js';
-import { playerAct, isBusy, intentStep, startExplore, stopIntents, RT, rtTick, playerReady } from './core/clock.js';
+import { playerAct, isBusy, intentStep, startExplore, RT, rtTick, playerReady } from './core/clock.js';
 import { autoAct } from './bot/autoplay.js';
 import { buildNoise, buildRealMap } from './render/mapart.js';
 import { rebuildLights, buildDynLights, computeHi } from './render/light.js';
@@ -28,7 +27,7 @@ function onLevelBound() {
   for (const e of S.ents) dressEnt(e);
   placeWalker();
   if (S.player) { RS.camX = S.player.x + .5; RS.camY = S.player.y + .5; }
-  RS.selMinion = null; closeLoot(); closePack(); foeSeen.clear(); setPaused(false); RTQ.fn = null;
+  RS.selMinion = null; closeLoot(); closePack(); setPaused(false); RTQ.fn = null;
   resetHUD(); hud();
 }
 /* ---------- after each of your turns ---------- */
@@ -95,16 +94,6 @@ setModalActions({
 });
 
 /* ---------- real time ---------- */
-// the game stops by itself when an enemy comes into view that you have not seen for a while
-const foeSeen = new Map();
-function checkNewFoes() {
-  let fresh = null;
-  for (const e of S.ents) {
-    if (e.dead || !hostile(S.player, e) || !vis[I(e.x, e.y)] || !seesE(e)) continue;
-    const last = foeSeen.get(e.id); if ((last === undefined || S.turn - last > 12) && !fresh) fresh = e; foeSeen.set(e.id, S.turn);
-  }
-  if (fresh && !S.stress && !RS.auto) { stopIntents(); setPaused(true, `${cap1(displayName(fresh))} in sight`); }
-}
 // your act when you are ready: autoplay, then what you asked for, then whatever you set in motion (walking is in walk.js)
 function rtPlayer() {
   if (RS.auto) { playerAct(() => autoAct() || 100); return; }
@@ -120,7 +109,7 @@ function rtAdvance(dt) {
   const tickSec = SPEEDS[RS.speed] / 10; simAcc += dt * (S.intent.rest ? 5 : 1);
   let n = 0;
   while (simAcc >= tickSec && n++ < 60) {
-    simAcc -= tickSec; if (playerReady()) rtPlayer(); rtTick(); checkNewFoes();
+    simAcc -= tickSec; if (playerReady()) rtPlayer(); rtTick();
     if (RS.paused || RS.modalOpen || S.gameOver) { simAcc = 0; break; }
   }
   if (n >= 60) simAcc = 0;
