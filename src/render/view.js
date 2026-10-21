@@ -29,6 +29,7 @@ export function resize() {
 const scaleS = () => 32 * RS.zoom * V.zoomMul * RS.DPR * q().scale;
 export function screenToTile(px, py) { const v = RS.view, k = RS.DPR * q().scale; return [Math.floor((px * k + v.ox) / v.s), Math.floor((py * k + v.oy) / v.s)]; }
 
+let lastT = 0;
 export function render(t) {
   const c = ctx, vw = cv.width, vh = cv.height, s = scaleS(), u = s / 32, pl = S.player;
   spriteScale(u);
@@ -60,6 +61,13 @@ export function render(t) {
   const nowMs = performance.now();
   for (const k of S.corpses) { if (!vis[I(k.x, k.y)] || !inView(k.x, k.y) || k.showAt > nowMs) continue; const sp = corpseSprite(k, u); const X = (k.x + .5) * s - ox, Y = (k.y + .5) * s - oy; c.drawImage(sp.c, X - sp.ox, Y - sp.oy); }
   const vs = []; for (const e of S.ents) if (!e.dead && vis[I(e.x, e.y)] && inView(e.x, e.y)) vs.push(e); vs.sort((a, b) => a.ry - b.ry);
+  // walking: the stride grows while a figure moves and settles when it stops; a full step cycle every 1.1 tiles
+  const adt = Math.min(.05, Math.max(0, t - lastT)); lastT = t;
+  for (const e of vs) {
+    const d = e.ox0 === undefined ? 0 : Math.hypot(e.rx - e.ox0, e.ry - e.oy0); e.ox0 = e.rx; e.oy0 = e.ry;
+    const mv = d > adt * .5 && d < .5 ? 1 : 0; e.wamp = (e.wamp || 0) + (mv - (e.wamp || 0)) * Math.min(1, adt * (mv ? 9 : 6));
+    if (d < .5) e.wph = (e.wph ?? e.id * 1.9) + d * 6.2832 / 1.1;
+  }
   const sh = getShadow();
   for (const e of vs) {
     const X = (e.rx + e.ax + .5) * s - ox, Y = (e.ry + e.ay + .5) * s - oy + s * .36;
