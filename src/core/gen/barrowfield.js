@@ -49,11 +49,13 @@ export function genBarrowfield() {
   // graves
   const nearRoad = (x, y) => { const r = road[clamp(x - 1, 0, road.length - 1)]; return Math.abs(r[1] - y) <= 2; };
   const inChapel = (x, y) => x >= cx0 - 2 && x <= cx0 + cw + 1 && y >= cy0 - 2 && y <= cy0 + ch + 1;
-  for (const gx of [4, 7, 10, 13, 16, 19, 22, 25, 28]) for (let y = 3; y <= H - 4; y++) {
+  // loose rows with cross-aisles, never two stones touching along a row, so the field can be crossed in any direction
+  for (const gx of [4, 8, 12, 16, 20, 24, 28]) { let prev = false; for (let y = 3; y <= H - 4; y++) {
     const i = I(gx, y);
-    if (!outdoor[i] || map[i] === PATH || nearRoad(gx, y) || inChapel(gx, y)) continue; if (rnd() < .6) { map[i] = GRAVE; graves.push([gx, y]); }
-  }
-  for (let k = 0; k < 120 && trees.length < 18; k++) {
+    if (y % 5 === 0 || prev || !outdoor[i] || map[i] === PATH || nearRoad(gx, y) || inChapel(gx, y)) { prev = false; continue; }
+    prev = rnd() < .5; if (prev) { map[i] = GRAVE; graves.push([gx, y]); }
+  } }
+  for (let k = 0; k < 120 && trees.length < 11; k++) {
     const x = ri(2, 30), y = ri(2, H - 3), i = I(x, y);
     if ((map[i] === GRASS || map[i] === DIRT) && !nearRoad(x, y) && !inChapel(x, y) && x % 3 !== 1) { map[i] = TREE; trees.push([x, y]); }
   }

@@ -15,5 +15,6 @@ export const QL = [
 ];
 export const q = () => QL[RS.qLevel];
 // the Dread grade
-export const V = { moon: [.075, .09, .12], mem: [.13, .13, .15], fogA: .2, sat: .42, tint: [206, 216, 210], grain: .13, zoomMul: 1.35, lantern: [.62, .88, .7] };
+// moon: open-air light; inside/deep: light under a roof and far below; mem: places seen before but not in sight now
+export const V = { moon: [.27, .29, .34], inside: [.1, .095, .11], deep: [.1, .11, .13], mem: [.24, .24, .27], fogA: .16, sat: .36, tint: [214, 222, 216], grain: .11, zoomMul: 1.35, lantern: [.66, .9, .74], lanternR: 10, lanternI: 2, vign: .7 };
 export const $ = s => document.querySelector(s);

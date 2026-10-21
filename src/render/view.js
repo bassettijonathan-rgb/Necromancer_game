@@ -14,7 +14,7 @@ export const cv = $('#cv'), ctx = cv.getContext('2d', { alpha: false });
 let vign = null, redVign = null, grainPat = null;
 function makeVign() {
   vign = mk(cv.width, cv.height); const g = vign.getContext('2d'); const R = Math.hypot(cv.width, cv.height) / 2;
-  const gr = g.createRadialGradient(cv.width / 2, cv.height / 2, R * .35, cv.width / 2, cv.height / 2, R); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,1)'); g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
+  const gr = g.createRadialGradient(cv.width / 2, cv.height / 2, R * .45, cv.width / 2, cv.height / 2, R); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,1)'); g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
   redVign = mk(cv.width, cv.height); const r = redVign.getContext('2d'); const g2 = r.createRadialGradient(cv.width / 2, cv.height / 2, R * .3, cv.width / 2, cv.height / 2, R); g2.addColorStop(0, 'rgba(120,0,0,0)'); g2.addColorStop(1, 'rgba(150,0,0,.9)'); r.fillStyle = g2; r.fillRect(0, 0, cv.width, cv.height);
 }
 function drawGrain(a) {
@@ -144,7 +144,7 @@ export function render(t) {
   if (hv && inb(hv[0], hv[1]) && seen[I(hv[0], hv[1])]) { c.strokeStyle = 'rgba(214,203,180,.16)'; c.lineWidth = 1; c.strokeRect(hv[0] * s - ox + .5, hv[1] * s - oy + .5, s - 1, s - 1); }
   // grading
   if (!vign || vign.width !== vw || vign.height !== vh) makeVign();
-  c.globalAlpha = 1; c.drawImage(vign, 0, 0);
+  c.globalAlpha = V.vign; c.drawImage(vign, 0, 0); c.globalAlpha = 1;
   const bl = pl.blood / pl.bmax, torso = partOf(pl, 'torso'); const danger = Math.max(1 - bl / .45, 1 - torso.hp / torso.max / .5, 0);
   if (danger > 0 && !S.gameOver) { const p = Math.pow(Math.abs(Math.sin(t * 2.7)), 6) * Math.min(1, danger); c.globalAlpha = Math.min(.8, p * 1.3); c.drawImage(redVign, 0, 0, vw, vh); c.globalAlpha = 1; }
   if (q().grain) drawGrain(V.grain);
