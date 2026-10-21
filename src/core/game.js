@@ -30,7 +30,7 @@ export function newStressGame() {
 
 /* ---------- saves ---------- */
 // fields the renderer hangs on creatures and remains; never saved
-const RENDER_KEYS = new Set(['rx', 'ry', 'ax', 'ay', 'flash', 'ghostAt', 'showAt']);
+const RENDER_KEYS = new Set(['rx', 'ry', 'ax', 'ay', 'flash', 'ghostAt', 'showAt', 'ox0', 'oy0', 'wamp', 'wph', 'atkAt', 'px', 'py', 'settle']);
 const TRANSIENT = new Set(['L', 'player', 'target', 'markT', 'ents', 'lootQueued', 'intent']);
 function b64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
 function unb64(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }

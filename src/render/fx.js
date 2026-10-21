@@ -114,9 +114,9 @@ export function installFX() {
       case 'act': fxDelay = 0; break;
       case 'spawn': dressEnt(d); break;
       case 'blow': {
-        if (d.kind === 'melee') { const a = d.a, t = d.t, d0 = fxDelay, lx = (t.x - a.x) * .42, ly = (t.y - a.y) * .42; fxAt(d0, () => { a.ax = lx; a.ay = ly; }); hitAt = d0 + 65; fxStep(); }
+        if (d.kind === 'melee') { const a = d.a, t = d.t, d0 = fxDelay, lx = (t.x - a.x) * .42, ly = (t.y - a.y) * .42; fxAt(d0, () => { a.ax = lx; a.ay = ly; a.atkAt = performance.now() - 125; }); hitAt = d0 + 65; fxStep(); }
         else if (d.kind === 'shot') fxShot(d.a, d.t);
-        else if (d.kind === 'bolt') { fxBoltShot(d.a, d.t); hitAt = fxDelay + (.08 + dist(d.a, d.t) * .025) * 1000; }
+        else if (d.kind === 'bolt') { d.a.atkAt = performance.now() + fxDelay - 160; fxBoltShot(d.a, d.t); hitAt = fxDelay + (.08 + dist(d.a, d.t) * .025) * 1000; }
         else if (d.kind === 'burst') { const d0 = fxDelay, kd = d.rot ? 'rot' : 'bone'; fxAt(d0, () => fxExplode(d.x, d.y, kd, d.R)); hitAt = d0 + 40; hitFrom = [d.x, d.y]; fxStep(); }
         break;
       }
